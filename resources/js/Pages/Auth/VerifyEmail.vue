@@ -25,37 +25,39 @@ const verificationLinkSent = computed(
     <GuestLayout>
         <Head title="Email Verification" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            Thanks for signing up! Before getting started, could you verify your
-            email address by clicking on the link we just emailed to you? If you
-            didn't receive the email, we will gladly send you another.
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Verify your email</h1>
+            <p class="mt-1 text-sm leading-relaxed text-zinc-500">
+                Thanks for signing up! Before getting started, could you verify your email address by clicking
+                on the link we just emailed to you? If you didn&rsquo;t receive the email, we will gladly send
+                you another.
+            </p>
         </div>
 
         <div
-            class="mb-4 text-sm font-medium text-green-600"
+            class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
             v-if="verificationLinkSent"
         >
-            A new verification link has been sent to the email address you
-            provided during registration.
+            A new verification link has been sent to the email address you provided during registration.
         </div>
 
-        <form @submit.prevent="submit">
-            <div class="mt-4 flex items-center justify-between">
-                <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Resend Verification Email
-                </PrimaryButton>
+        <form @submit.prevent="submit" class="space-y-5">
+            <PrimaryButton
+                class="w-full"
+                :class="{ 'opacity-60': form.processing }"
+                :disabled="form.processing"
+            >
+                {{ form.processing ? 'Sending…' : 'Resend Verification Email' }}
+            </PrimaryButton>
 
-                <Link
-                    :href="route('logout')"
-                    method="post"
-                    as="button"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >Log Out</Link
-                >
-            </div>
+            <Link
+                :href="route('logout')"
+                method="post"
+                as="button"
+                class="block w-full text-center text-sm font-semibold text-zinc-500 transition hover:text-zinc-800"
+            >
+                Log Out
+            </Link>
         </form>
     </GuestLayout>
 </template>

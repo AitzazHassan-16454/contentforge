@@ -24,14 +24,21 @@ const submit = () => {
     <GuestLayout>
         <Head title="Register" />
 
-        <form @submit.prevent="submit">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Create your account</h1>
+            <p class="mt-1 text-sm text-zinc-500">
+                Start generating and publishing posts in minutes.
+            </p>
+        </div>
+
+        <form @submit.prevent="submit" class="space-y-5">
             <div>
                 <InputLabel for="name" value="Name" />
 
                 <TextInput
                     id="name"
                     type="text"
-                    class="mt-1 block w-full"
+                    class="mt-1.5"
                     v-model="form.name"
                     required
                     autofocus
@@ -41,13 +48,13 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.name" />
             </div>
 
-            <div class="mt-4">
+            <div>
                 <InputLabel for="email" value="Email" />
 
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="mt-1.5"
                     v-model="form.email"
                     required
                     autocomplete="username"
@@ -56,13 +63,13 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
+            <div>
                 <InputLabel for="password" value="Password" />
 
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-1.5"
                     v-model="form.password"
                     required
                     autocomplete="new-password"
@@ -71,7 +78,7 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4">
+            <div>
                 <InputLabel
                     for="password_confirmation"
                     value="Confirm Password"
@@ -80,7 +87,7 @@ const submit = () => {
                 <TextInput
                     id="password_confirmation"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-1.5"
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
@@ -92,22 +99,20 @@ const submit = () => {
                 />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
-                <Link
-                    :href="route('login')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                    Already registered?
-                </Link>
+            <PrimaryButton
+                class="w-full"
+                :class="{ 'opacity-60': form.processing }"
+                :disabled="form.processing"
+            >
+                {{ form.processing ? 'Creating account…' : 'Create account' }}
+            </PrimaryButton>
 
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Register
-                </PrimaryButton>
-            </div>
+            <p class="text-center text-sm text-zinc-500">
+                Already registered?
+                <Link :href="route('login')" class="font-semibold text-indigo-600 hover:text-indigo-500">
+                    Sign in
+                </Link>
+            </p>
         </form>
     </GuestLayout>
 </template>

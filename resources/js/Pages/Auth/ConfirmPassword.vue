@@ -21,18 +21,20 @@ const submit = () => {
     <GuestLayout>
         <Head title="Confirm Password" />
 
-        <div class="mb-4 text-sm text-gray-600">
-            This is a secure area of the application. Please confirm your
-            password before continuing.
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Confirm your password</h1>
+            <p class="mt-1 text-sm text-zinc-500">
+                This is a secure area of the application. Please confirm your password before continuing.
+            </p>
         </div>
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="space-y-5">
             <div>
                 <InputLabel for="password" value="Password" />
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-1.5"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
@@ -41,15 +43,13 @@ const submit = () => {
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 flex justify-end">
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
-                >
-                    Confirm
-                </PrimaryButton>
-            </div>
+            <PrimaryButton
+                class="w-full"
+                :class="{ 'opacity-60': form.processing }"
+                :disabled="form.processing"
+            >
+                {{ form.processing ? 'Confirming…' : 'Confirm' }}
+            </PrimaryButton>
         </form>
     </GuestLayout>
 </template>
