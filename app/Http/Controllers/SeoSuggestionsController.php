@@ -21,7 +21,19 @@ class SeoSuggestionsController extends Controller
             currentExcerpt: $request->input('excerpt'),
         );
 
-        $response = $agent->prompt($agent->userPrompt(), timeout: 60);
+        try {
+            $response = $agent->prompt($agent->userPrompt(), timeout: 120);
+        } catch (\Throwable $e) {
+            Log::error('SEO suggestion request to AI provider failed', [
+                'message' => $e->getMessage(),
+                'class' => $e::class,
+                'user_id' => $request->user()?->id,
+            ]);
+
+            return response()->json([
+                'message' => 'Couldn\'t reach the AI provider. Please try again in a moment.',
+            ], 502);
+        }
 
         $suggestions = $this->parse($response->text);
 

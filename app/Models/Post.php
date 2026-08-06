@@ -4,14 +4,18 @@ namespace App\Models;
 
 use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['user_id', 'title', 'slug', 'content', 'excerpt', 'status', 'published_at'])]
+#[Fillable(['user_id', 'title', 'slug', 'content', 'excerpt', 'cover_image', 'cover_image_alt', 'status', 'view_count', 'published_at', 'scheduled_at'])]
+#[ObservedBy(\App\Observers\PostObserver::class)]
 class Post extends Model
 {
     /** @use HasFactory<PostFactory> */
@@ -25,6 +29,8 @@ class Post extends Model
     {
         return [
             'published_at' => 'datetime',
+            'scheduled_at' => 'datetime',
+            'view_count' => 'integer',
         ];
     }
 
@@ -43,6 +49,21 @@ class Post extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    public function chunks(): HasMany
+    {
+        return $this->hasMany(PostChunk::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function reactions(): HasMany
+    {
+        return $this->hasMany(PostReaction::class);
+    }
+
     public function scopePublished(Builder $query): Builder
     {
         return $query->where('status', self::STATUS_PUBLISHED)
@@ -54,16 +75,55 @@ class Post extends Model
         return $query->where('status', self::STATUS_DRAFT);
     }
 
+    public function scopeScheduled(Builder $query): Builder
+    {
+        return $query->where('status', self::STATUS_DRAFT)
+            ->whereNotNull('scheduled_at');
+    }
+
     public function isPublished(): bool
     {
         return $this->status === self::STATUS_PUBLISHED && $this->published_at !== null;
+    }
+
+    public function isScheduled(): bool
+    {
+        return $this->status === self::STATUS_DRAFT && $this->scheduled_at !== null;
+    }
+
+    /**
+     * Absolute URL for the post's cover image, or null when none is set.
+     */
+    public function coverImageUrl(): ?string
+    {
+        return $this->cover_image ? Storage::disk('public')->url($this->cover_image) : null;
+    }
+
+    /**
+     * Reaction counts keyed by type, e.g. ['like' => 3, 'fire' => 1, 'star' => 0].
+     *
+     * @return array<string, int>
+     */
+    public function reactionCounts(): array
+    {
+        $counts = PostReaction::query()
+            ->where('post_id', $this->getKey())
+            ->selectRaw('type, count(*) as total')
+            ->groupBy('type')
+            ->pluck('total', 'type')
+            ->map(fn ($value) => (int) $value);
+
+        return collect(PostReaction::TYPES)
+            ->mapWithKeys(fn (string $type) => [$type => $counts->get($type, 0)])
+            ->all();
     }
 
     public function publish(): self
     {
         $this->forceFill([
             'status' => self::STATUS_PUBLISHED,
-            'published_at' => $this->published_at ?? now(),
+            'published_at' => $this->published_at ?? ($this->scheduled_at ?? now()),
+            'scheduled_at' => null,
         ])->save();
 
         return $this;
@@ -74,6 +134,7 @@ class Post extends Model
         $this->forceFill([
             'status' => self::STATUS_DRAFT,
             'published_at' => null,
+            'scheduled_at' => null,
         ])->save();
 
         return $this;

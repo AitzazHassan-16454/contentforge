@@ -16,7 +16,7 @@ class SeoSuggestionsTest extends TestCase
         $this->postJson(route('dashboard.posts.seo-suggestions'), [
             'title' => 'My Draft',
             'content' => str_repeat('lorem ipsum ', 30),
-        ])->assertRedirect(route('login'));
+        ])->assertUnauthorized();
     }
 
     public function test_request_is_validated(): void
@@ -73,5 +73,20 @@ class SeoSuggestionsTest extends TestCase
                 'meta_description' => null,
                 'tags' => [],
             ]);
+    }
+
+    public function test_returns_friendly_error_when_provider_fails(): void
+    {
+        SeoSuggestions::fake([])->preventStrayPrompts();
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->postJson(route('dashboard.posts.seo-suggestions'), [
+                'title' => 'My Draft',
+                'content' => '# Hello world'.str_repeat("\n\nParagraph of meaningful body copy.", 20),
+            ])
+            ->assertStatus(502)
+            ->assertJson(['message' => "Couldn't reach the AI provider. Please try again in a moment."]);
     }
 }

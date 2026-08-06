@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import ThemeToggle from '@/Components/ThemeToggle.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingSidebar = ref(false);
@@ -24,24 +25,24 @@ const initials = (name) =>
 </script>
 
 <template>
-    <div class="min-h-screen bg-zinc-50">
+    <div class="min-h-screen bg-zinc-50 dark:bg-zinc-950">
         <!-- Sidebar -->
         <aside
-            class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-200 bg-white transition-transform duration-200 lg:translate-x-0"
+            class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-200 bg-white transition-smooth duration-300 dark:border-zinc-800 dark:bg-zinc-900 lg:translate-x-0"
             :class="showingSidebar ? 'translate-x-0' : '-translate-x-full'"
         >
             <!-- Logo -->
-            <div class="flex h-16 shrink-0 items-center border-b border-zinc-100 px-5">
+            <div class="flex h-16 shrink-0 items-center border-b border-zinc-100 px-5 dark:border-zinc-800">
                 <Link href="/" class="flex items-center gap-2.5">
                     <ApplicationLogo class="h-8 w-8" />
-                    <span class="text-lg font-bold tracking-tight text-zinc-900">ContentForge</span>
+                    <span class="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">ContentForge</span>
                 </Link>
             </div>
 
             <!-- Navigation -->
             <nav class="flex-1 space-y-7 overflow-y-auto px-3 py-6">
                 <div>
-                    <p class="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                    <p class="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                         Workspace
                     </p>
                     <div class="mt-2 space-y-1">
@@ -49,8 +50,8 @@ const initials = (name) =>
                             :href="route('dashboard.posts.index')"
                             :class="[
                                 isMyPostsActive()
-                                    ? 'bg-indigo-50 text-indigo-700'
-                                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900',
+                                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
+                                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
                                 'group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition',
                             ]"
                         >
@@ -63,8 +64,8 @@ const initials = (name) =>
                             :href="route('dashboard.posts.create')"
                             :class="[
                                 route().current('dashboard.posts.create')
-                                    ? 'bg-indigo-50 text-indigo-700'
-                                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900',
+                                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
+                                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
                                 'group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition',
                             ]"
                         >
@@ -77,7 +78,7 @@ const initials = (name) =>
                 </div>
 
                 <div>
-                    <p class="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                    <p class="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
                         Account
                     </p>
                     <div class="mt-2 space-y-1">
@@ -85,8 +86,8 @@ const initials = (name) =>
                             :href="route('profile.edit')"
                             :class="[
                                 route().current('profile.edit')
-                                    ? 'bg-indigo-50 text-indigo-700'
-                                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900',
+                                    ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300'
+                                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100',
                                 'group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-semibold transition',
                             ]"
                         >
@@ -100,34 +101,34 @@ const initials = (name) =>
             </nav>
 
             <!-- User -->
-            <div class="shrink-0 border-t border-zinc-100 p-3">
+            <div class="shrink-0 border-t border-zinc-100 p-3 dark:border-zinc-800">
                 <Dropdown align="left" width="48">
                     <template #trigger>
                         <button
                             type="button"
-                            class="flex w-full items-center gap-3 rounded-xl p-2 text-start transition hover:bg-zinc-50"
+                            class="flex w-full items-center gap-3 rounded-xl p-2 text-start transition hover:bg-zinc-50 dark:hover:bg-zinc-800"
                         >
                             <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-bold text-white">
                                 {{ initials($page.props.auth.user.name) }}
                             </span>
                             <span class="min-w-0 flex-1">
-                                <span class="block truncate text-sm font-semibold text-zinc-900">
+                                <span class="block truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                                     {{ $page.props.auth.user.name }}
                                 </span>
-                                <span class="block truncate text-xs text-zinc-500">
+                                <span class="block truncate text-xs text-zinc-500 dark:text-zinc-400">
                                     {{ $page.props.auth.user.email }}
                                 </span>
                             </span>
-                            <svg class="h-4 w-4 shrink-0 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <svg class="h-4 w-4 shrink-0 text-zinc-400 dark:text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                             </svg>
                         </button>
                     </template>
 
                     <template #content>
-                        <div class="border-b border-zinc-100 px-4 py-3">
-                            <p class="truncate text-sm font-semibold text-zinc-900">{{ $page.props.auth.user.name }}</p>
-                            <p class="truncate text-xs text-zinc-500">{{ $page.props.auth.user.email }}</p>
+                        <div class="border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+                            <p class="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">{{ $page.props.auth.user.name }}</p>
+                            <p class="truncate text-xs text-zinc-500 dark:text-zinc-400">{{ $page.props.auth.user.email }}</p>
                         </div>
                         <div class="py-1">
                             <DropdownLink :href="route('profile.edit')">Profile settings</DropdownLink>
@@ -157,11 +158,12 @@ const initials = (name) =>
         <!-- Main column -->
         <div class="flex min-h-screen flex-col lg:pl-64">
             <!-- Top bar -->
-            <header class="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white/85 px-4 backdrop-blur sm:px-6 lg:px-8">
+            <header class="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-zinc-200 bg-white/85 px-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/85 sm:px-6 lg:px-8">
                 <button
                     type="button"
-                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 lg:hidden"
+                    class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 lg:hidden"
                     @click="showingSidebar = true"
+                    aria-label="Open sidebar"
                 >
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -172,9 +174,11 @@ const initials = (name) =>
                     <slot name="header" />
                 </div>
 
+                <ThemeToggle />
+
                 <Link
                     href="/"
-                    class="hidden shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 sm:inline-flex"
+                    class="hidden shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 sm:inline-flex"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />

@@ -4,18 +4,27 @@ namespace Tests\Feature;
 
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class PublicPostsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_homepage_lists_published_posts(): void
+    public function test_homepage_renders_the_marketing_landing_page(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page->component('Home'));
+    }
+
+    public function test_blog_lists_published_posts(): void
     {
         $published = Post::factory()->published()->create();
         Post::factory()->draft()->create();
 
-        $response = $this->get('/');
+        $response = $this->get('/blog');
 
         $response->assertOk();
         $response->assertSee($published->title);
@@ -38,12 +47,21 @@ class PublicPostsTest extends TestCase
         $this->get(route('posts.show', $post->slug))->assertNotFound();
     }
 
-    public function test_homepage_is_paginated(): void
+    public function test_blog_is_paginated(): void
     {
         Post::factory()->published()->count(12)->create();
 
-        $this->get('/')
+        $this->get('/blog')
             ->assertOk()
             ->assertSee('Next');
+    }
+
+    public function test_homepage_embeds_latest_published_posts(): void
+    {
+        $post = Post::factory()->published()->create();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee($post->title);
     }
 }

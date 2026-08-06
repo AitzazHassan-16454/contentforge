@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class AuthorPostController extends Controller
 {
@@ -27,8 +29,11 @@ class AuthorPostController extends Controller
                 'title' => $post->title,
                 'slug' => $post->slug,
                 'excerpt' => $post->excerpt,
+                'cover_image' => $post->coverImageUrl(),
                 'status' => $post->status,
+                'views' => $post->view_count,
                 'published_at' => $post->published_at?->format('M j, Y'),
+                'scheduled_at' => $post->scheduled_at?->format('M j, Y g:i A'),
                 'updated_at' => $post->updated_at->diffForHumans(),
                 'categories' => $post->categories->map(fn ($category) => $category->only('id', 'name', 'slug')),
                 'tags' => $post->tags->map(fn ($tag) => $tag->only('id', 'name', 'slug')),
@@ -47,7 +52,11 @@ class AuthorPostController extends Controller
                 'slug' => '',
                 'excerpt' => '',
                 'content' => '',
+                'cover_image' => null,
+                'cover_image_url' => null,
+                'cover_image_alt' => '',
                 'status' => Post::STATUS_DRAFT,
+                'scheduled_at' => '',
                 'categories' => [],
                 'tags' => [],
             ],
@@ -60,9 +69,14 @@ class AuthorPostController extends Controller
      */
     public function store(StorePostRequest $request): RedirectResponse
     {
+        $data = $request->validated();
+
         $post = $request->user()->posts()->create([
-            ...$request->validated(),
+            ...$data,
+            'cover_image' => $this->coverImage(null, $request),
+            'cover_image_alt' => $data['cover_image_alt'] ?? $data['title'],
             'published_at' => $request->input('status') === Post::STATUS_PUBLISHED ? now() : null,
+            'scheduled_at' => $this->scheduledAt($request),
         ]);
 
         $post->syncTaxonomy(
@@ -91,7 +105,12 @@ class AuthorPostController extends Controller
                 'slug' => $post->slug,
                 'excerpt' => $post->excerpt,
                 'content' => $post->content,
+                'cover_image' => $post->cover_image,
+                'cover_image_url' => $post->coverImageUrl(),
+                'cover_image_alt' => $post->cover_image_alt,
                 'status' => $post->status,
+                'views' => $post->view_count,
+                'scheduled_at' => $post->scheduled_at?->format('Y-m-d\TH:i') ?? '',
                 'categories' => $post->categories->pluck('id'),
                 'tags' => $post->tags->pluck('name'),
             ],
@@ -106,11 +125,16 @@ class AuthorPostController extends Controller
     {
         $this->authorize('update', $post);
 
+        $data = $request->validated();
+
         $post->update([
-            ...$request->validated(),
+            ...$data,
+            'cover_image' => $this->coverImage($post, $request),
+            'cover_image_alt' => $data['cover_image_alt'] ?? $post->title,
             'published_at' => $request->input('status') === Post::STATUS_PUBLISHED
                 ? ($post->published_at ?? now())
                 : null,
+            'scheduled_at' => $this->scheduledAt($request),
         ]);
 
         $post->syncTaxonomy(
@@ -170,5 +194,40 @@ class AuthorPostController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'slug'])
             ->toArray();
+    }
+
+    /**
+     * Resolve the post's cover image path from the incoming request,
+     * storing newly uploaded files and removing replaced ones.
+     */
+    private function coverImage(?Post $post, Request $request): ?string
+    {
+        if ($request->boolean('remove_cover')) {
+            $post?->cover_image && Storage::disk('public')->delete($post->cover_image);
+
+            return null;
+        }
+
+        if ($request->hasFile('cover_image')) {
+            $post?->cover_image && Storage::disk('public')->delete($post->cover_image);
+
+            return $request->file('cover_image')->store('covers/'.$request->user()->id, 'public');
+        }
+
+        return $post?->cover_image;
+    }
+
+    /**
+     * Resolve the scheduled publish time. Publishing immediately clears it.
+     */
+    private function scheduledAt(Request $request): ?Carbon
+    {
+        if ($request->input('status') === Post::STATUS_PUBLISHED) {
+            return null;
+        }
+
+        return $request->filled('scheduled_at')
+            ? Carbon::parse($request->input('scheduled_at'))
+            : null;
     }
 }

@@ -2,9 +2,9 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import MarkdownContent from '@/Components/MarkdownContent.vue';
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
     post: {
@@ -131,12 +131,25 @@ async function suggestSeo() {
         });
 
         if (!response.ok) {
-            throw new Error('Could not generate suggestions. Check the draft and try again.');
+            let message = 'Could not generate suggestions. Check the draft and try again.';
+
+            try {
+                const body = await response.json();
+                if (body?.message) {
+                    message = body.message;
+                }
+            } catch {
+                // Response wasn't JSON; fall back to the generic message.
+            }
+
+            throw new Error(message);
         }
 
         seo.value.suggestions = await response.json();
     } catch (error) {
-        seo.value.error = error.message;
+        seo.value.error = error.message === 'Failed to fetch'
+            ? 'Network error — check your connection and try again.'
+            : error.message;
     } finally {
         seo.value.loading = false;
     }
@@ -261,8 +274,52 @@ function submit(status) {
     form.post(route('dashboard.posts.store'), { preserveScroll: true });
 }
 
+const saveStatus = computed(() => {
+    if (form.processing) {
+        return { label: 'Saving&hellip;', busy: true };
+    }
+
+    if (form.isDirty) {
+        return { label: 'Unsaved changes', busy: false };
+    }
+
+    return { label: 'All changes saved', busy: false };
+});
+
+function onKeydown(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault();
+        saveDraft();
+    }
+}
+
+const handleBeforeUnload = (event) => {
+    if (form.isDirty && !form.processing) {
+        event.preventDefault();
+        event.returnValue = '';
+    }
+};
+
+const handleNavigateBefore = (event) => {
+    if (event.detail.visit.method === 'get' && form.isDirty && !form.processing) {
+        if (!window.confirm('You have unsaved changes. Leave anyway?')) {
+            return false;
+        }
+    }
+};
+
+const unsubscribeBefore = router.on('before', handleNavigateBefore);
+
+onMounted(() => {
+    window.addEventListener('keydown', onKeydown);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+});
+
 onBeforeUnmount(() => {
     abortController.value?.abort();
+    window.removeEventListener('keydown', onKeydown);
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    unsubscribeBefore();
 });
 </script>
 
@@ -272,12 +329,12 @@ onBeforeUnmount(() => {
     <AuthenticatedLayout>
         <template #header>
             <div class="flex min-w-0 items-center justify-between gap-3">
-                <h2 class="truncate text-lg font-bold tracking-tight text-zinc-900">
+                <h2 class="truncate text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
                     {{ isEditing ? 'Edit Post' : 'New Post' }}
                 </h2>
                 <Link
                     :href="route('dashboard.posts.index')"
-                    class="hidden shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 sm:inline-flex"
+                    class="hidden shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 sm:inline-flex"
                 >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -298,9 +355,9 @@ onBeforeUnmount(() => {
             >
                 <div
                     v-if="flash.success"
-                    class="mb-6 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+                    class="mb-6 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
                 >
-                    <svg class="h-4 w-4 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <svg class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     {{ flash.success }}
@@ -319,7 +376,7 @@ onBeforeUnmount(() => {
                                     id="title"
                                     v-model="form.title"
                                     type="text"
-                                    class="input mt-1.5 !px-0 !py-2 !text-2xl !font-bold !shadow-none !ring-0 placeholder:!text-zinc-300 focus:!ring-0"
+                                    class="input mt-1.5 !px-0 !py-2 !text-2xl !font-bold !shadow-none !ring-0 placeholder:!text-zinc-300 focus:!ring-0 dark:bg-transparent dark:placeholder:!text-zinc-600"
                                     placeholder="An irresistible title..."
                                 />
                                 <InputError class="mt-2" :message="form.errors.title" />
@@ -359,16 +416,16 @@ onBeforeUnmount(() => {
 
                                 <div>
                                     <label for="tags" class="label">Tags</label>
-                                    <div class="mt-1.5 flex min-h-[2.75rem] flex-wrap items-center gap-1.5 rounded-xl bg-white px-3 py-2 shadow-sm ring-1 ring-inset ring-zinc-300 transition focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500">
+                                    <div class="mt-1.5 flex min-h-[2.75rem] flex-wrap items-center gap-1.5 rounded-xl bg-white px-3 py-2 shadow-sm ring-1 ring-inset ring-zinc-300 transition focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-500 dark:bg-zinc-900 dark:ring-zinc-700 dark:focus-within:ring-indigo-500">
                                         <span
                                             v-for="(tag, index) in form.tags"
                                             :key="tag"
-                                            class="chip bg-indigo-50 text-indigo-700"
+                                            class="chip bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
                                         >
                                             {{ tag }}
                                             <button
                                                 type="button"
-                                                class="-me-0.5 text-indigo-300 transition hover:text-indigo-600"
+                                                class="-me-0.5 text-indigo-300 transition hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-200"
                                                 @click="removeTag(index)"
                                             >
                                                 &times;
@@ -378,7 +435,7 @@ onBeforeUnmount(() => {
                                             id="tags"
                                             v-model="tagInput"
                                             type="text"
-                                            class="min-w-[8rem] flex-1 border-0 bg-transparent p-0 text-sm text-zinc-900 placeholder:text-zinc-400 focus:ring-0"
+                                            class="min-w-[8rem] flex-1 border-0 bg-transparent p-0 text-sm text-zinc-900 placeholder:text-zinc-400 focus:ring-0 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                                             placeholder="Add a tag, press Enter"
                                             @keydown="onTagKeydown"
                                             @blur="addTag"
@@ -392,12 +449,12 @@ onBeforeUnmount(() => {
 
                     <!-- Editor -->
                     <div class="card overflow-hidden">
-                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3 sm:px-6">
-                            <div class="flex gap-1 rounded-xl bg-zinc-100 p-1">
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3 sm:px-6 dark:border-zinc-800">
+                            <div class="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
                                 <button
                                     type="button"
                                     @click="previewMode = false"
-                                    :class="previewMode ? 'text-zinc-500 hover:text-zinc-800' : 'bg-white text-zinc-900 shadow-sm'"
+                                    :class="previewMode ? 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100' : 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50'"
                                     class="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition"
                                 >
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -408,7 +465,7 @@ onBeforeUnmount(() => {
                                 <button
                                     type="button"
                                     @click="previewMode = true"
-                                    :class="previewMode ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-800'"
+                                    :class="previewMode ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50' : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100'"
                                     class="inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-semibold transition"
                                 >
                                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -418,12 +475,31 @@ onBeforeUnmount(() => {
                                     Preview
                                 </button>
                             </div>
-                            <span class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-400">
-                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                                </svg>
-                                {{ wordCount.toLocaleString() }} words
-                            </span>
+                            <div class="flex items-center gap-3">
+                                <span
+                                    v-if="!generating"
+                                    class="inline-flex items-center gap-1.5 text-xs font-medium"
+                                    :class="saveStatus.busy ? 'text-indigo-600 dark:text-indigo-400' : saveStatus.label === 'Unsaved changes' ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 dark:text-zinc-500'"
+                                >
+                                    <svg v-if="saveStatus.busy" class="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                    <svg v-else-if="saveStatus.label === 'Unsaved changes'" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                                    </svg>
+                                    <svg v-else class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                    <span v-html="saveStatus.label"></span>
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-400 dark:text-zinc-500">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                                    </svg>
+                                    {{ wordCount.toLocaleString() }} words
+                                </span>
+                            </div>
                         </div>
 
                         <div class="p-5 sm:p-6">
@@ -431,12 +507,12 @@ onBeforeUnmount(() => {
                                 v-if="!previewMode"
                                 v-model="form.content"
                                 rows="24"
-                                class="block w-full resize-y rounded-xl border-zinc-200 font-mono text-sm leading-relaxed shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                class="block w-full resize-y rounded-xl border-zinc-200 bg-white font-mono text-sm leading-relaxed text-zinc-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                                 placeholder="Write in Markdown, or generate a first draft with AI..."
                             ></textarea>
-                            <div v-else class="min-h-[36rem] rounded-xl border border-zinc-100 bg-zinc-50/50 p-6">
+                            <div v-else class="min-h-[36rem] rounded-xl border border-zinc-100 bg-zinc-50/50 p-6 dark:border-zinc-800 dark:bg-zinc-900/50">
                                 <MarkdownContent v-if="form.content" :content="form.content" />
-                                <p v-else class="text-sm text-zinc-400">Nothing to preview yet.</p>
+                                <p v-else class="text-sm text-zinc-400 dark:text-zinc-500">Nothing to preview yet.</p>
                             </div>
                             <InputError class="mt-3" :message="form.errors.content" />
                         </div>
@@ -466,17 +542,20 @@ onBeforeUnmount(() => {
                             </svg>
                             Save Draft
                         </button>
-                        <span v-if="form.processing" class="inline-flex items-center gap-2 text-sm text-zinc-500">
-                            <svg class="h-4 w-4 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24">
+                        <span v-if="form.processing" class="inline-flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+                            <svg class="h-4 w-4 animate-spin text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
                             Saving&hellip;
                         </span>
+                        <span v-else class="hidden text-xs font-medium text-zinc-400 dark:text-zinc-500 sm:inline-flex">
+                            Tip: press <kbd class="rounded-md bg-zinc-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-zinc-600 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700">Ctrl</kbd> + <kbd class="rounded-md bg-zinc-100 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-zinc-600 ring-1 ring-inset ring-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-700">S</kbd> to save as draft
+                        </span>
                         <Link
                             v-if="isEditing && post.status === 'published'"
                             :href="route('posts.show', post.slug)"
-                            class="ms-auto inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 transition hover:text-indigo-500"
+                            class="ms-auto inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                         >
                             View published post
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -489,7 +568,7 @@ onBeforeUnmount(() => {
                 <!-- Sidebar -->
                 <aside class="min-w-0 space-y-6">
                     <!-- AI Assistant -->
-                    <div class="card border-indigo-100 p-6">
+                    <div class="card border-indigo-100 p-6 dark:border-indigo-500/20">
                         <div class="flex items-center gap-3">
                             <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -497,8 +576,8 @@ onBeforeUnmount(() => {
                                 </svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-bold text-zinc-900">AI Assistant</h3>
-                                <p class="text-xs text-zinc-500">Stream a full first draft</p>
+                                <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">AI Assistant</h3>
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400">Stream a full first draft</p>
                             </div>
                         </div>
 
@@ -576,34 +655,34 @@ onBeforeUnmount(() => {
                                 Generate with AI
                             </button>
 
-                            <div v-else class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                            <div v-else class="rounded-xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-500/30 dark:bg-indigo-500/10">
                                 <div class="flex items-center justify-between gap-2">
-                                    <p class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-700">
+                                    <p class="inline-flex items-center gap-2 text-sm font-semibold text-indigo-700 dark:text-indigo-300">
                                         <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                                         </svg>
                                         Generating draft&hellip;
                                     </p>
-                                    <span class="shrink-0 text-xs font-medium text-indigo-500">{{ streamedWords.toLocaleString() }} words</span>
+                                    <span class="shrink-0 text-xs font-medium text-indigo-500 dark:text-indigo-400">{{ streamedWords.toLocaleString() }} words</span>
                                 </div>
-                                <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-indigo-100">
+                                <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-indigo-100 dark:bg-indigo-500/20">
                                     <div class="h-full w-full animate-pulse rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"></div>
                                 </div>
                                 <button
                                     type="button"
                                     @click="stopGenerating"
-                                    class="mt-3 w-full rounded-xl bg-white px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm ring-1 ring-inset ring-indigo-200 transition hover:bg-indigo-100"
+                                    class="mt-3 w-full rounded-xl bg-white px-3 py-2 text-sm font-semibold text-indigo-700 shadow-sm ring-1 ring-inset ring-indigo-200 transition hover:bg-indigo-100 dark:bg-zinc-900 dark:text-indigo-300 dark:ring-indigo-500/30 dark:hover:bg-zinc-800"
                                 >
                                     Stop generating
                                 </button>
                             </div>
 
-                            <p v-if="streamError" class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+                            <p v-if="streamError" class="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
                                 {{ streamError }}
                             </p>
 
-                            <p class="text-xs leading-relaxed text-zinc-400">
+                            <p class="text-xs leading-relaxed text-zinc-400 dark:text-zinc-500">
                                 Generated content is a draft for you to review and edit. Nothing is published
                                 automatically.
                             </p>
@@ -613,14 +692,14 @@ onBeforeUnmount(() => {
                     <!-- SEO -->
                     <div class="card p-6">
                         <div class="flex items-center gap-3">
-                            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm">
+                            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white shadow-sm dark:bg-zinc-700">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
                                 </svg>
                             </span>
                             <div>
-                                <h3 class="text-base font-bold text-zinc-900">SEO &amp; Tags</h3>
-                                <p class="text-xs text-zinc-500">AI title, meta &amp; tag suggestions</p>
+                                <h3 class="text-base font-bold text-zinc-900 dark:text-zinc-100">SEO &amp; Tags</h3>
+                                <p class="text-xs text-zinc-500 dark:text-zinc-400">AI title, meta &amp; tag suggestions</p>
                             </div>
                         </div>
 
@@ -636,53 +715,53 @@ onBeforeUnmount(() => {
                             </svg>
                             Suggest SEO &amp; tags
                         </button>
-                        <div v-else class="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                            <p class="text-sm font-semibold text-zinc-700">Analyzing draft&hellip;</p>
-                            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-zinc-200">
-                                <div class="h-full w-full animate-pulse rounded-full bg-zinc-900"></div>
+                        <div v-else class="mt-5 rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-800/50">
+                            <p class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Analyzing draft&hellip;</p>
+                            <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
+                                <div class="h-full w-full animate-pulse rounded-full bg-zinc-900 dark:bg-zinc-500"></div>
                             </div>
                         </div>
 
-                        <p v-if="form.content.trim().length < 50 && !seo.loading" class="mt-2 text-xs text-zinc-400">
+                        <p v-if="form.content.trim().length < 50 && !seo.loading" class="mt-2 text-xs text-zinc-400 dark:text-zinc-500">
                             Write at least 50 characters before asking for suggestions.
                         </p>
 
-                        <p v-if="seo.error" class="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+                        <p v-if="seo.error" class="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400">
                             {{ seo.error }}
                         </p>
 
                         <div v-if="seo.suggestions" class="mt-5 space-y-5">
                             <div v-if="seo.suggestions.title">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">Suggested title</p>
-                                <p class="mt-1 text-sm font-medium text-zinc-800">{{ seo.suggestions.title }}</p>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Suggested title</p>
+                                <p class="mt-1 text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ seo.suggestions.title }}</p>
                                 <button
                                     type="button"
                                     @click="applyTitle"
-                                    class="mt-1.5 text-xs font-bold text-indigo-600 transition hover:text-indigo-500"
+                                    class="mt-1.5 text-xs font-bold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                                 >
                                     Apply title
                                 </button>
                             </div>
 
                             <div v-if="seo.suggestions.meta_description">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">Meta description</p>
-                                <p class="mt-1 text-sm leading-relaxed text-zinc-600">{{ seo.suggestions.meta_description }}</p>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Meta description</p>
+                                <p class="mt-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{{ seo.suggestions.meta_description }}</p>
                                 <button
                                     type="button"
                                     @click="applyMetaDescription"
-                                    class="mt-1.5 text-xs font-bold text-indigo-600 transition hover:text-indigo-500"
+                                    class="mt-1.5 text-xs font-bold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                                 >
                                     Apply to excerpt
                                 </button>
                             </div>
 
                             <div v-if="seo.suggestions.tags.length">
-                                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400">Suggested tags</p>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500">Suggested tags</p>
                                 <div class="mt-2 flex flex-wrap gap-1.5">
                                     <span
                                         v-for="tag in seo.suggestions.tags"
                                         :key="tag"
-                                        class="chip bg-zinc-100 text-zinc-700"
+                                        class="chip bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
                                     >
                                         #{{ tag }}
                                     </span>
@@ -690,7 +769,7 @@ onBeforeUnmount(() => {
                                 <button
                                     type="button"
                                     @click="applyTags"
-                                    class="mt-1.5 text-xs font-bold text-indigo-600 transition hover:text-indigo-500"
+                                    class="mt-1.5 text-xs font-bold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                                 >
                                     Add all tags
                                 </button>

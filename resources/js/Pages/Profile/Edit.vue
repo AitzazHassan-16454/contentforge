@@ -21,7 +21,7 @@ defineProps({
     <AuthenticatedLayout>
         <template #header>
             <div class="flex items-center justify-between gap-3">
-                <h2 class="text-lg font-bold tracking-tight text-zinc-900">Profile</h2>
+                <h2 class="text-lg font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Profile</h2>
             </div>
         </template>
 

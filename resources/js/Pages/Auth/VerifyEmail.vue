@@ -26,8 +26,8 @@ const verificationLinkSent = computed(
         <Head title="Email Verification" />
 
         <div class="mb-6">
-            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Verify your email</h1>
-            <p class="mt-1 text-sm leading-relaxed text-zinc-500">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Verify your email</h1>
+            <p class="mt-1 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">
                 Thanks for signing up! Before getting started, could you verify your email address by clicking
                 on the link we just emailed to you? If you didn&rsquo;t receive the email, we will gladly send
                 you another.
@@ -54,7 +54,7 @@ const verificationLinkSent = computed(
                 :href="route('logout')"
                 method="post"
                 as="button"
-                class="block w-full text-center text-sm font-semibold text-zinc-500 transition hover:text-zinc-800"
+                class="block w-full text-center text-sm font-semibold text-zinc-500 transition hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100"
             >
                 Log Out
             </Link>

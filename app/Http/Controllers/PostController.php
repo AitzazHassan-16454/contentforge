@@ -16,7 +16,7 @@ class PostController extends Controller
     {
         $posts = Post::query()
             ->published()
-            ->with(['author:id,name', 'categories', 'tags'])
+            ->with(['author:id,name,username', 'categories', 'tags'])
             ->when($request->filled('category'), function ($query) use ($request) {
                 $query->whereHas('categories', fn ($q) => $q->where('categories.slug', $request->query('category')));
             })
@@ -39,7 +39,7 @@ class PostController extends Controller
     {
         $posts = Post::query()
             ->published()
-            ->with(['author:id,name', 'categories', 'tags'])
+            ->with(['author:id,name,username', 'categories', 'tags'])
             ->whereHas('categories', fn ($q) => $q->whereKey($category->getKey()))
             ->latest('published_at')
             ->paginate(9)
@@ -58,7 +58,7 @@ class PostController extends Controller
     {
         $posts = Post::query()
             ->published()
-            ->with(['author:id,name', 'categories', 'tags'])
+            ->with(['author:id,name,username', 'categories', 'tags'])
             ->whereHas('tags', fn ($q) => $q->whereKey($tag->getKey()))
             ->latest('published_at')
             ->paginate(9)
@@ -77,8 +77,28 @@ class PostController extends Controller
     {
         abort_unless($post->isPublished(), 404);
 
+        $post->load('author:id,name,username', 'categories', 'tags');
+        $post->increment('view_count');
+
+        $user = auth()->user();
+
         return inertia('Posts/Show', [
-            'post' => $this->present($post->load('author:id,name', 'categories', 'tags')),
+            'post' => $this->present($post),
+            'comments' => $post->comments()
+                ->with('user:id,name')
+                ->latest()
+                ->get()
+                ->map(fn ($comment) => [
+                    'id' => $comment->id,
+                    'body' => $comment->body,
+                    'created_at' => $comment->created_at->diffForHumans(),
+                    'author' => $comment->user?->name,
+                    'user_id' => $comment->user_id,
+                ]),
+            'reactions' => $post->reactionCounts(),
+            'user_reactions' => $user
+                ? $post->reactions()->where('user_id', $user->id)->pluck('type')->all()
+                : [],
         ]);
     }
 
@@ -93,8 +113,13 @@ class PostController extends Controller
             'slug' => $post->slug,
             'content' => $post->content,
             'excerpt' => $post->excerpt,
+            'cover_image' => $post->coverImageUrl(),
+            'cover_image_alt' => $post->cover_image_alt,
+            'views' => $post->view_count,
             'published_at' => $post->published_at?->diffForHumans(),
             'author' => $post->author?->name,
+            'author_id' => $post->author?->id,
+            'author_username' => $post->author?->username,
             'categories' => $post->categories->map(fn ($category) => $category->only('id', 'name', 'slug')),
             'tags' => $post->tags->map(fn ($tag) => $tag->only('id', 'name', 'slug')),
         ];

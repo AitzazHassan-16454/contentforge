@@ -36,8 +36,8 @@ const submit = () => {
         <Head title="Reset Password" />
 
         <div class="mb-6">
-            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Choose a new password</h1>
-            <p class="mt-1 text-sm text-zinc-500">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Choose a new password</h1>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                 Set a new password for your account.
             </p>
         </div>

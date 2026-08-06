@@ -23,8 +23,12 @@ class PostFactory extends Factory
             'title' => fake()->sentence(6),
             'content' => fake()->paragraphs(5, true),
             'excerpt' => fake()->paragraph(),
+            'cover_image' => null,
+            'cover_image_alt' => null,
             'status' => Post::STATUS_DRAFT,
+            'view_count' => 0,
             'published_at' => null,
+            'scheduled_at' => null,
         ];
     }
 
@@ -41,6 +45,15 @@ class PostFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'status' => Post::STATUS_DRAFT,
             'published_at' => null,
+        ]);
+    }
+
+    public function scheduled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => Post::STATUS_DRAFT,
+            'published_at' => null,
+            'scheduled_at' => now()->addDay(),
         ]);
     }
 }

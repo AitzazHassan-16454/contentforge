@@ -1,16 +1,41 @@
 <?php
 
+use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\AuthorPostController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\GenerateController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostReactionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SeoSuggestionsController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [PostController::class, 'index'])->name('posts.index');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/blog', [PostController::class, 'index'])->name('posts.index');
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/pricing', [PageController::class, 'pricing'])->name('pricing');
+Route::get('/privacy', [PageController::class, 'privacy'])->name('privacy');
+Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+Route::get('/contact', [ContactController::class, 'show'])->name('contact.show');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('contact.store');
+
+Route::get('/search', [SearchController::class, 'index'])->name('posts.search');
 Route::get('/categories/{category:slug}', [PostController::class, 'category'])->name('posts.category');
 Route::get('/tags/{tag:slug}', [PostController::class, 'tag'])->name('posts.tag');
 Route::get('/posts/{post:slug}', [PostController::class, 'show'])->name('posts.show');
+Route::get('/authors/{user:username}', [AuthorController::class, 'show'])->name('authors.show');
+
+Route::middleware('auth')->group(function () {
+    Route::post('/posts/{post:slug}/comments', [CommentController::class, 'store'])->name('posts.comments.store');
+    Route::delete('/posts/{post:slug}/comments/{comment}', [CommentController::class, 'destroy'])->name('posts.comments.destroy');
+    Route::post('/posts/{post:slug}/reactions', [PostReactionController::class, 'toggle'])->name('posts.reactions.toggle');
+});
 
 Route::middleware('auth')->group(function () {
     Route::redirect('/dashboard', '/dashboard/posts')->name('dashboard');
@@ -29,7 +54,7 @@ Route::middleware('auth')->group(function () {
         ->name('dashboard.posts.ai.generate');
 
     Route::post('/dashboard/posts/seo-suggestions', [SeoSuggestionsController::class, 'store'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:30,1')
         ->name('dashboard.posts.seo-suggestions');
 });
 

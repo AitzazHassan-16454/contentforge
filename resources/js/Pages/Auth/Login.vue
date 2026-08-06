@@ -34,8 +34,8 @@ const submit = () => {
         <Head title="Log in" />
 
         <div class="mb-6">
-            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Welcome back</h1>
-            <p class="mt-1 text-sm text-zinc-500">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Welcome back</h1>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                 Sign in to continue writing with AI.
             </p>
         </div>
@@ -87,7 +87,7 @@ const submit = () => {
 
             <label class="flex items-center gap-2.5">
                 <Checkbox name="remember" v-model:checked="form.remember" />
-                <span class="text-sm text-zinc-600">Remember me</span>
+                <span class="text-sm text-zinc-600 dark:text-zinc-300">Remember me</span>
             </label>
 
             <PrimaryButton
@@ -98,7 +98,7 @@ const submit = () => {
                 {{ form.processing ? 'Signing in…' : 'Sign in' }}
             </PrimaryButton>
 
-            <p class="text-center text-sm text-zinc-500">
+            <p class="text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Don&rsquo;t have an account?
                 <Link :href="route('register')" class="font-semibold text-indigo-600 hover:text-indigo-500">
                     Create one

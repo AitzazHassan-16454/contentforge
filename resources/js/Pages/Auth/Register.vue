@@ -25,8 +25,8 @@ const submit = () => {
         <Head title="Register" />
 
         <div class="mb-6">
-            <h1 class="text-2xl font-bold tracking-tight text-zinc-900">Create your account</h1>
-            <p class="mt-1 text-sm text-zinc-500">
+            <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Create your account</h1>
+            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                 Start generating and publishing posts in minutes.
             </p>
         </div>
@@ -107,7 +107,7 @@ const submit = () => {
                 {{ form.processing ? 'Creating account…' : 'Create account' }}
             </PrimaryButton>
 
-            <p class="text-center text-sm text-zinc-500">
+            <p class="text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Already registered?
                 <Link :href="route('login')" class="font-semibold text-indigo-600 hover:text-indigo-500">
                     Sign in

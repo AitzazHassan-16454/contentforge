@@ -4,44 +4,250 @@
 
 @layer base {
     ::selection {
-        @apply bg-indigo-100 text-indigo-900;
+        @apply bg-indigo-100 text-indigo-900 dark:bg-indigo-500/30 dark:text-indigo-100;
     }
 
     html {
         @apply scroll-smooth;
     }
+
+    /* Page transitions powered by the View Transitions API. */
+    ::view-transition-old(root) {
+        animation: view-transition-out 200ms cubic-bezier(0.4, 0, 1, 1) both;
+    }
+
+    ::view-transition-new(root) {
+        animation: view-transition-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes view-transition-out {
+        to {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+
+    @keyframes view-transition-in {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+    }
+
+    /* Respect users who prefer reduced motion. */
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+@layer utilities {
+    .animate-fade-in-up {
+        animation: fade-in-up 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .animate-fade-in-down {
+        animation: fade-in-down 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .animate-fade-in {
+        animation: fade-in 500ms ease-out both;
+    }
+
+    .animate-scale-in {
+        animation: scale-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .animate-float {
+        animation: float 7s ease-in-out infinite;
+    }
+
+    .animate-glow-pulse {
+        animation: glow-pulse 8s ease-in-out both;
+    }
+
+    /* Scroll-triggered reveal (adds .is-visible via IntersectionObserver). */
+    .reveal {
+        opacity: 0;
+        transform: translateY(20px);
+        transition:
+            opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+            transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--reveal-delay, 0ms);
+    }
+
+    .reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .reveal {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    /* Smooth motion easing shared by hover/transition effects. */
+    .transition-smooth {
+        transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .anim-delay-1 {
+        animation-delay: 100ms;
+    }
+
+    .anim-delay-2 {
+        animation-delay: 200ms;
+    }
+
+    .anim-delay-3 {
+        animation-delay: 300ms;
+    }
+
+    .anim-delay-4 {
+        animation-delay: 400ms;
+    }
+
+    .anim-delay-5 {
+        animation-delay: 500ms;
+    }
+
+    .anim-delay-6 {
+        animation-delay: 600ms;
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in-down {
+    from {
+        opacity: 0;
+        transform: translateY(-14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes glow-pulse {
+    0%,
+    100% {
+        opacity: 0.55;
+    }
+
+    50% {
+        opacity: 1;
+    }
 }
 
 @layer components {
     .label {
-        @apply block text-sm font-medium text-zinc-700;
+        @apply block text-sm font-medium text-zinc-700 dark:text-zinc-300;
     }
 
     .input {
-        @apply block w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 transition placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400;
+        @apply block w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-sm text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 transition placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-700 dark:placeholder:text-zinc-500 dark:focus:ring-indigo-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500;
     }
 
     .select {
-        @apply block w-full rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 transition focus:ring-2 focus:ring-inset focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400;
+        @apply block w-full rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 transition focus:ring-2 focus:ring-inset focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400 dark:bg-zinc-900 dark:text-zinc-100 dark:ring-zinc-700 dark:focus:ring-indigo-500 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500;
     }
 
     .btn-primary {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 active:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50;
+        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-zinc-950;
     }
 
     .btn-secondary {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm ring-1 ring-inset ring-zinc-300 transition hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 active:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50;
+        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm ring-1 ring-inset ring-zinc-300 transition hover:bg-zinc-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700 dark:hover:bg-zinc-800 dark:focus-visible:ring-zinc-500 dark:focus-visible:ring-offset-zinc-950 dark:active:bg-zinc-800;
     }
 
     .btn-danger {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 active:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50;
+        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white active:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-zinc-950;
     }
 
     .card {
-        @apply rounded-2xl border border-zinc-200 bg-white shadow-soft;
+        @apply rounded-2xl border border-zinc-200 bg-white shadow-soft dark:border-zinc-800 dark:bg-zinc-900;
     }
 
     .chip {
         @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold;
+    }
+
+    .skeleton {
+        @apply relative overflow-hidden rounded-lg bg-zinc-200/70 dark:bg-zinc-800;
+    }
+
+    .skeleton::after {
+        content: '';
+        @apply absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/50 to-transparent dark:via-white/10;
+        transform: translateX(-100%);
+        animation: skeleton-shimmer 1.6s infinite;
+    }
+
+    @keyframes skeleton-shimmer {
+        100% {
+            transform: translateX(100%);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .skeleton::after {
+            animation: none;
+        }
     }
 }

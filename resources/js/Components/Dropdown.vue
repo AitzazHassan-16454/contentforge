@@ -12,7 +12,7 @@ const props = defineProps({
     },
     contentClasses: {
         type: String,
-        default: 'py-1 bg-white',
+        default: 'py-1 bg-white dark:bg-zinc-900',
     },
 });
 
@@ -73,7 +73,7 @@ const open = ref(false);
                 @click="open = false"
             >
                 <div
-                    class="overflow-hidden rounded-xl ring-1 ring-zinc-200"
+                    class="overflow-hidden rounded-xl ring-1 ring-zinc-200 dark:ring-zinc-700"
                     :class="contentClasses"
                 >
                     <slot name="content" />
