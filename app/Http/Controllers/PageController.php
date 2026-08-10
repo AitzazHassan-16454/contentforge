@@ -17,13 +17,6 @@ class PageController extends Controller
         ]);
     }
 
-    public function pricing()
-    {
-        return inertia('Marketing/Pricing', [
-            'plans' => config('plans'),
-        ]);
-    }
-
     public function privacy()
     {
         return inertia('Marketing/Privacy');

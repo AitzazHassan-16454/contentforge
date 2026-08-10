@@ -23,6 +23,7 @@ class CommentFactory extends Factory
             'post_id' => Post::factory(),
             'user_id' => User::factory(),
             'body' => fake()->paragraph(),
+            'is_approved' => true,
         ];
     }
 }

@@ -21,12 +21,23 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
             .mount(el);
+
+        const loader = document.getElementById('app-loader');
+
+        if (loader) {
+            requestAnimationFrame(() => {
+                loader.classList.add('app-loader-leave');
+                loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+            });
+        }
+
+        return app;
     },
     progress: {
-        color: '#4B5563',
+        color: '#4F46E5',
     },
 });

@@ -18,18 +18,6 @@ class MarketingPagesTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('Marketing/About'));
     }
 
-    public function test_pricing_page_renders_all_plans(): void
-    {
-        $response = $this->get(route('pricing'));
-
-        $response->assertOk();
-        $response->assertInertia(fn (Assert $page) => $page->component('Marketing/Pricing'));
-
-        foreach (config('plans') as $plan) {
-            $response->assertSee($plan['name']);
-        }
-    }
-
     public function test_privacy_page_renders(): void
     {
         $this->get(route('privacy'))

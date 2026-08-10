@@ -106,6 +106,9 @@ return [
                 'text' => [
                     'default' => env('GEMINI_TEXT_MODEL', 'gemini-3.6-flash'),
                 ],
+                'audio' => [
+                    'default' => env('GEMINI_AUDIO_MODEL', 'gemini-2.5-flash-preview-tts'),
+                ],
             ],
         ],
 

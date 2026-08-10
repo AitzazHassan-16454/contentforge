@@ -41,7 +41,6 @@ class HomeController extends Controller
                 'authors' => $authorCount,
                 'views' => $totalViews,
             ],
-            'plans' => config('plans'),
         ]);
     }
 }

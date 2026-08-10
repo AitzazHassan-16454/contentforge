@@ -23,13 +23,13 @@ class ContactTest extends TestCase
         $this->post(route('contact.store'), [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
-            'subject' => 'Pricing question',
-            'message' => 'Does the Pro plan include a free trial?',
+            'subject' => 'General question',
+            'message' => 'Is the markdown editor included?',
         ])->assertRedirect();
 
         $this->assertDatabaseHas('contact_messages', [
             'email' => 'jane@example.com',
-            'subject' => 'Pricing question',
+            'subject' => 'General question',
         ]);
     }
 

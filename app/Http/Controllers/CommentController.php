@@ -23,6 +23,7 @@ class CommentController extends Controller
         $comment = $post->comments()->create([
             'user_id' => $request->user()->id,
             'body' => trim($validated['body']),
+            'is_approved' => false,
         ]);
 
         return response()->json([

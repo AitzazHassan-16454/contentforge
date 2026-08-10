@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(RolePermissionSeeder::class);
+
         $demo = User::firstOrCreate(
             ['email' => 'demo@example.com'],
             [
@@ -23,6 +25,18 @@ class DatabaseSeeder extends Seeder
                 'password' => 'password',
             ],
         );
+
+        $demo->assignRole('author');
+
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@contentforge.test'],
+            [
+                'name' => 'ContentForge Admin',
+                'password' => 'password',
+            ],
+        );
+
+        $admin->assignRole('admin');
 
         Post::where('user_id', $demo->id)->delete();
 

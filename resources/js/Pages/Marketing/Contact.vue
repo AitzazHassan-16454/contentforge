@@ -26,11 +26,6 @@ const submit = () => {
 
 const channels = [
     {
-        title: 'Sales & plans',
-        body: 'Questions about pricing, trials, or teams. We typically reply within one business day.',
-        icon: 'M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-    },
-    {
         title: 'Support & help',
         body: 'Stuck on something? Send us the details and we will get you unblocked.',
         icon: 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z',
@@ -47,15 +42,11 @@ const channels = [
     <Head title="Contact" />
 
     <BlogLayout>
-        <section class="relative overflow-hidden border-b border-zinc-100 dark:border-zinc-800">
-            <div
-                class="pointer-events-none absolute inset-0 dark:opacity-20"
-                style="background-image: radial-gradient(circle at 1px 1px, rgb(228 228 231 / 0.6) 1px, transparent 0); background-size: 28px 28px;"
-            ></div>
-            <div class="animate-glow-pulse pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-indigo-100/70 blur-3xl dark:bg-indigo-500/20"></div>
+        <section class="relative overflow-hidden border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-300"></div>
 
             <div class="relative mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-                <p class="animate-fade-in-down text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Contact</p>
+                <p class="animate-fade-in-down text-sm font-semibold uppercase tracking-widest text-primary-700 dark:text-primary-500">Contact</p>
                 <h1 class="animate-fade-in-up mx-auto mt-4 max-w-2xl text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 anim-delay-1 sm:text-5xl">
                     We would love to hear from you
                 </h1>
@@ -68,13 +59,13 @@ const channels = [
         <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
             <div class="grid gap-10 lg:grid-cols-5">
                 <div class="lg:col-span-2">
-                    <p data-reveal class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Ways to reach us</p>
+                    <p data-reveal class="text-sm font-semibold uppercase tracking-widest text-primary-700 dark:text-primary-500">Ways to reach us</p>
                     <h2 data-reveal class="mt-3 text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
                         Choose a topic
                     </h2>
                     <div class="mt-8 space-y-4">
                         <div v-for="(channel, index) in channels" :key="channel.title" data-reveal :style="{ '--reveal-delay': `${index * 80}ms` }" class="card flex items-start gap-4 p-5">
-                            <div class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                            <div class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700 dark:bg-primary-600/15 dark:text-primary-300">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" :d="channel.icon" />
                                 </svg>
@@ -87,7 +78,7 @@ const channels = [
                     </div>
                     <p data-reveal class="mt-8 text-sm text-zinc-500 dark:text-zinc-400">
                         Prefer email? Write to us directly at
-                        <a href="mailto:hello@contentforge.dev" class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">hello@contentforge.dev</a>.
+                        <a href="mailto:hello@contentforge.dev" class="font-semibold text-primary-700 hover:text-primary-600 dark:text-primary-500">hello@contentforge.dev</a>.
                     </p>
                 </div>
 
@@ -154,7 +145,7 @@ const channels = [
                         <div class="flex items-center justify-between gap-4">
                             <p class="text-xs text-zinc-500 dark:text-zinc-400">
                                 We only use this to reply to you. See our
-                                <Link href="/privacy" class="font-semibold text-indigo-600 dark:text-indigo-400">privacy policy</Link>.
+                                <Link href="/privacy" class="font-semibold text-primary-700 dark:text-primary-500">privacy policy</Link>.
                             </p>
                             <button type="submit" class="btn-primary shrink-0" :class="{ 'opacity-50': form.processing }" :disabled="form.processing">
                                 <svg v-if="form.processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">

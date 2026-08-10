@@ -137,4 +137,80 @@ class AuthorPostsTest extends TestCase
         $this->assertTrue($post->isPublished());
         $this->assertNotNull($post->published_at);
     }
+
+    public function test_editing_a_scheduled_post_preserves_its_schedule(): void
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->scheduled()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->patch(route('dashboard.posts.update', $post), [
+                'title' => 'Still Scheduled',
+                'content' => 'Updated content',
+                'status' => Post::STATUS_DRAFT,
+            ])
+            ->assertRedirect();
+
+        $this->assertNotNull($post->fresh()->scheduled_at);
+        $this->assertTrue($post->fresh()->isScheduled());
+    }
+
+    public function test_author_can_update_a_scheduled_posts_publish_time(): void
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->scheduled()->create(['user_id' => $user->id]);
+
+        $next = now()->addDays(3)->format('Y-m-d\TH:i');
+
+        $this->actingAs($user)
+            ->patch(route('dashboard.posts.update', $post), [
+                'title' => $post->title,
+                'content' => $post->content,
+                'status' => Post::STATUS_DRAFT,
+                'scheduled_at' => $next,
+            ])
+            ->assertRedirect();
+
+        $this->assertEquals(
+            \Illuminate\Support\Carbon::parse($next)->toDateTimeString(),
+            $post->fresh()->scheduled_at->toDateTimeString(),
+        );
+    }
+
+    public function test_clearing_scheduled_at_removes_the_schedule(): void
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->scheduled()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->patch(route('dashboard.posts.update', $post), [
+                'title' => $post->title,
+                'content' => $post->content,
+                'status' => Post::STATUS_DRAFT,
+                'scheduled_at' => '',
+            ])
+            ->assertRedirect();
+
+        $this->assertNull($post->fresh()->scheduled_at);
+        $this->assertFalse($post->fresh()->isScheduled());
+    }
+
+    public function test_publishing_a_scheduled_post_clears_its_schedule(): void
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->scheduled()->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->patch(route('dashboard.posts.update', $post), [
+                'title' => $post->title,
+                'content' => $post->content,
+                'status' => Post::STATUS_PUBLISHED,
+            ])
+            ->assertRedirect();
+
+        $fresh = $post->fresh();
+
+        $this->assertTrue($fresh->isPublished());
+        $this->assertNull($fresh->scheduled_at);
+    }
 }

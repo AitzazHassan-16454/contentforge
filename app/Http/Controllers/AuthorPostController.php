@@ -55,9 +55,11 @@ class AuthorPostController extends Controller
                 'cover_image' => null,
                 'cover_image_url' => null,
                 'cover_image_alt' => '',
+                'gallery_images' => [],
+                'gallery_image_urls' => [],
                 'status' => Post::STATUS_DRAFT,
                 'scheduled_at' => '',
-                'categories' => [],
+                'category_ids' => [],
                 'tags' => [],
             ],
             'categories' => $this->categories(),
@@ -75,6 +77,7 @@ class AuthorPostController extends Controller
             ...$data,
             'cover_image' => $this->coverImage(null, $request),
             'cover_image_alt' => $data['cover_image_alt'] ?? $data['title'],
+            'gallery_images' => $this->galleryImages(null, $request),
             'published_at' => $request->input('status') === Post::STATUS_PUBLISHED ? now() : null,
             'scheduled_at' => $this->scheduledAt($request),
         ]);
@@ -108,10 +111,12 @@ class AuthorPostController extends Controller
                 'cover_image' => $post->cover_image,
                 'cover_image_url' => $post->coverImageUrl(),
                 'cover_image_alt' => $post->cover_image_alt,
+                'gallery_images' => $post->gallery_images ?? [],
+                'gallery_image_urls' => $post->galleryImageUrls(),
                 'status' => $post->status,
                 'views' => $post->view_count,
                 'scheduled_at' => $post->scheduled_at?->format('Y-m-d\TH:i') ?? '',
-                'categories' => $post->categories->pluck('id'),
+                'category_ids' => $post->categories->pluck('id'),
                 'tags' => $post->tags->pluck('name'),
             ],
             'categories' => $this->categories(),
@@ -131,10 +136,15 @@ class AuthorPostController extends Controller
             ...$data,
             'cover_image' => $this->coverImage($post, $request),
             'cover_image_alt' => $data['cover_image_alt'] ?? $post->title,
+            'gallery_images' => $this->galleryImages($post, $request),
             'published_at' => $request->input('status') === Post::STATUS_PUBLISHED
                 ? ($post->published_at ?? now())
                 : null,
-            'scheduled_at' => $this->scheduledAt($request),
+            'scheduled_at' => $request->input('status') === Post::STATUS_PUBLISHED
+                ? null
+                : ($request->filled('scheduled_at')
+                    ? Carbon::parse($request->input('scheduled_at'))
+                    : ($request->has('scheduled_at') ? null : $post->scheduled_at)),
         ]);
 
         $post->syncTaxonomy(
@@ -215,6 +225,34 @@ class AuthorPostController extends Controller
         }
 
         return $post?->cover_image;
+    }
+
+    /**
+     * Resolve the gallery images.
+     */
+    private function galleryImages(?Post $post, Request $request): array
+    {
+        $images = $post?->gallery_images ?? [];
+
+        // Remove deleted images
+        if ($request->has('remove_gallery_images')) {
+            $remove = $request->input('remove_gallery_images');
+            foreach ($remove as $path) {
+                if (in_array($path, $images)) {
+                    Storage::disk('public')->delete($path);
+                    $images = array_values(array_diff($images, [$path]));
+                }
+            }
+        }
+
+        // Add new images
+        if ($request->hasFile('new_gallery_images')) {
+            foreach ($request->file('new_gallery_images') as $file) {
+                $images[] = $file->store('galleries/'.$request->user()->id, 'public');
+            }
+        }
+
+        return $images;
     }
 
     /**

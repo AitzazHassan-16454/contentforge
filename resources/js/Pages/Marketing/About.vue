@@ -35,17 +35,13 @@ const values = [
     <Head title="About" />
 
     <BlogLayout>
-        <section class="relative overflow-hidden border-b border-zinc-100 dark:border-zinc-800">
-            <div
-                class="pointer-events-none absolute inset-0 dark:opacity-20"
-                style="background-image: radial-gradient(circle at 1px 1px, rgb(228 228 231 / 0.6) 1px, transparent 0); background-size: 28px 28px;"
-            ></div>
-            <div class="animate-glow-pulse pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-indigo-100/70 blur-3xl dark:bg-indigo-500/20"></div>
+        <section class="relative overflow-hidden border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-300"></div>
 
             <div class="relative mx-auto max-w-3xl px-4 py-20 text-center sm:px-6">
-                <p class="animate-fade-in-down text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">About us</p>
+                <p class="animate-fade-in-down text-sm font-semibold uppercase tracking-widest text-primary-700 dark:text-primary-500">About us</p>
                 <h1 class="animate-fade-in-up mx-auto mt-4 max-w-2xl text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 anim-delay-1 sm:text-5xl">
-                    We build tools that make writing <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent dark:from-indigo-400 dark:to-violet-400">feel effortless</span>
+                    We build tools that make writing <span class="bg-gradient-to-r from-primary-700 to-primary-800 bg-clip-text text-transparent dark:from-primary-500 dark:to-primary-500">feel effortless</span>
                 </h1>
                 <p class="animate-fade-in-up mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-600 dark:text-zinc-400 anim-delay-2">
                     ContentForge started with a simple observation: the hardest part of blogging is never the writing —
@@ -58,7 +54,7 @@ const values = [
         <section class="mx-auto max-w-6xl px-4 py-20 sm:px-6">
             <div class="grid items-center gap-12 lg:grid-cols-2">
                 <div>
-                    <p data-reveal class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Our mission</p>
+                    <p data-reveal class="text-sm font-semibold uppercase tracking-widest text-primary-700 dark:text-primary-500">Our mission</p>
                     <h2 data-reveal class="mt-3 text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
                         Give every writer a fair shot at being read
                     </h2>
@@ -79,7 +75,7 @@ const values = [
 
                 <div data-reveal class="grid gap-5 sm:grid-cols-2">
                     <div v-for="(value, index) in values" :key="value.title" :style="{ '--reveal-delay': `${index * 100}ms` }" class="card p-6">
-                        <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/15 dark:text-indigo-300">
+                        <div class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary-50 text-primary-700 dark:bg-primary-600/15 dark:text-primary-300">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                 <path stroke-linecap="round" stroke-linejoin="round" :d="value.icon" />
                             </svg>
@@ -91,7 +87,7 @@ const values = [
             </div>
         </section>
 
-        <section class="border-y border-zinc-100 bg-zinc-50/60 dark:border-zinc-800 dark:bg-zinc-900/40">
+        <section class="border-y border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950">
             <div class="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-16 text-center sm:grid-cols-3 sm:px-6">
                 <div data-reveal>
                     <p class="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">{{ stats.posts || 0 }}</p>

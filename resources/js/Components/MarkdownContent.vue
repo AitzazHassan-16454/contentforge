@@ -22,7 +22,7 @@ const html = computed(() =>
 
 <template>
     <div
-        class="prose prose-zinc prose-headings:scroll-mt-24 prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:underline prose-pre:rounded-xl prose-pre:bg-zinc-900 dark:prose-invert dark:prose-a:text-indigo-400 max-w-none"
+        class="prose prose-zinc font-serif prose-headings:scroll-mt-24 prose-headings:font-display prose-h1:tracking-tight prose-h2:tracking-tight prose-a:text-primary-700 prose-a:no-underline hover:prose-a:underline prose-pre:rounded-xl prose-pre:bg-zinc-900 prose-pre:font-sans dark:prose-invert dark:prose-a:text-primary-500 max-w-none"
         v-html="html"
     />
 </template>

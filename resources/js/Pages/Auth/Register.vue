@@ -24,9 +24,9 @@ const submit = () => {
     <GuestLayout>
         <Head title="Register" />
 
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Create your account</h1>
-            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <div class="mb-8 text-center">
+            <h1 class="font-display text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">Create your account</h1>
+            <p class="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
                 Start generating and publishing posts in minutes.
             </p>
         </div>
@@ -109,7 +109,7 @@ const submit = () => {
 
             <p class="text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Already registered?
-                <Link :href="route('login')" class="font-semibold text-indigo-600 hover:text-indigo-500">
+                <Link :href="route('login')" class="font-semibold text-primary-700 transition-colors hover:text-primary-600 dark:text-primary-400">
                     Sign in
                 </Link>
             </p>

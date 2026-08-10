@@ -3,7 +3,8 @@
         <defs>
             <linearGradient id="cf-mark" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
                 <stop stop-color="#6366F1" />
-                <stop offset="1" stop-color="#8B5CF6" />
+                <stop offset="0.6" stop-color="#7C3AED" />
+                <stop offset="1" stop-color="#4F46E5" />
             </linearGradient>
         </defs>
         <rect width="40" height="40" rx="11" fill="url(#cf-mark)" />

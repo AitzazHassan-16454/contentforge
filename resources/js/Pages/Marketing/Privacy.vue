@@ -45,15 +45,11 @@ const sections = [
     <Head title="Privacy Policy" />
 
     <BlogLayout>
-        <section class="relative overflow-hidden border-b border-zinc-100 dark:border-zinc-800">
-            <div
-                class="pointer-events-none absolute inset-0 dark:opacity-20"
-                style="background-image: radial-gradient(circle at 1px 1px, rgb(228 228 231 / 0.6) 1px, transparent 0); background-size: 28px 28px;"
-            ></div>
-            <div class="animate-glow-pulse pointer-events-none absolute -top-32 left-1/2 h-72 w-[42rem] -translate-x-1/2 rounded-full bg-indigo-100/70 blur-3xl dark:bg-indigo-500/20"></div>
+        <section class="relative overflow-hidden border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+            <div class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-300"></div>
 
             <div class="relative mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
-                <p class="animate-fade-in-down text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Legal</p>
+                <p class="animate-fade-in-down text-sm font-semibold uppercase tracking-widest text-primary-700 dark:text-primary-500">Legal</p>
                 <h1 class="animate-fade-in-up mx-auto mt-4 max-w-2xl text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 anim-delay-1 sm:text-5xl">
                     Privacy Policy
                 </h1>
@@ -78,7 +74,7 @@ const sections = [
 
             <div data-reveal class="card mt-14 p-6">
                 <p class="text-sm text-zinc-600 dark:text-zinc-400">
-                    Questions about this policy? <Link :href="route('contact.show')" class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">Contact us</Link>.
+                    Questions about this policy? <Link :href="route('contact.show')" class="font-semibold text-primary-700 hover:text-primary-600 dark:text-primary-500">Contact us</Link>.
                 </p>
             </div>
         </section>

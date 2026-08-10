@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\PostView;
 use App\Models\Tag;
+use App\Services\PostAudio;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -79,12 +81,14 @@ class PostController extends Controller
 
         $post->load('author:id,name,username', 'categories', 'tags');
         $post->increment('view_count');
+        PostView::recordFor($post, now()->toImmutable());
 
         $user = auth()->user();
 
         return inertia('Posts/Show', [
             'post' => $this->present($post),
             'comments' => $post->comments()
+                ->approved()
                 ->with('user:id,name')
                 ->latest()
                 ->get()
@@ -115,6 +119,9 @@ class PostController extends Controller
             'excerpt' => $post->excerpt,
             'cover_image' => $post->coverImageUrl(),
             'cover_image_alt' => $post->cover_image_alt,
+            'gallery_images' => $post->galleryImageUrls(),
+            'audio_url' => app(PostAudio::class)->urlFor($post),
+            'audio_voice' => $post->audio_voice,
             'views' => $post->view_count,
             'published_at' => $post->published_at?->diffForHumans(),
             'author' => $post->author?->name,

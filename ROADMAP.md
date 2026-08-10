@@ -22,16 +22,13 @@ author pages, and dark mode.
 ### 2. About, Contact, Privacy & Terms pages
 - `/about`, `/contact` (functional form storing to DB), `/privacy`, `/terms`.
 
-### 3. Pricing & plans
-- `subscriptions`/plan model on users (free / pro).
-- Usage limits: monthly AI generations + published post caps per plan.
-- `/pricing` page and `/dashboard/billing` with a simulated upgrade flow
-  (Stripe ready later).
+### 3. ~~Pricing & plans~~ — removed (kept free to use)
+- Pricing page, plan model, usage limits, and billing were dropped. ContentForge is free to use.
 
-### 4. Admin panel `/admin`
-- Roles: `admin` / `moderator` on users.
+### 4. Admin panel `/admin` ✅ done
+- Roles: `admin` / `moderator` on users (spatie/laravel-permission).
 - Manage categories & tags (CRUD).
-- Comment moderation (approve / delete).
+- Comment moderation (approve / delete / unapprove, pending-approval queue).
 - User management and site settings (site name, tagline, social links).
 
 ## Week 2 — Media, analytics & engagement

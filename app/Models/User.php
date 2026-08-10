@@ -11,13 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'username', 'email', 'password', 'bio'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     public function posts(): HasMany
     {
@@ -57,6 +58,22 @@ class User extends Authenticatable
         static::creating(function (User $user) {
             $user->username ??= self::uniqueUsername($user->name);
         });
+    }
+
+    /**
+     * Whether the user holds the admin role.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Whether the user holds an administrative (admin or moderator) role.
+     */
+    public function isStaff(): bool
+    {
+        return $this->hasAnyRole(['admin', 'moderator']);
     }
 
     /**

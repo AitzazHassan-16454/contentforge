@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-#[Fillable(['user_id', 'title', 'slug', 'content', 'excerpt', 'cover_image', 'cover_image_alt', 'status', 'view_count', 'published_at', 'scheduled_at'])]
+#[Fillable(['user_id', 'title', 'slug', 'content', 'excerpt', 'cover_image', 'cover_image_alt', 'gallery_images', 'status', 'view_count', 'published_at', 'scheduled_at', 'audio_path', 'audio_voice', 'audio_generated_at'])]
 #[ObservedBy(\App\Observers\PostObserver::class)]
 class Post extends Model
 {
@@ -30,7 +30,9 @@ class Post extends Model
         return [
             'published_at' => 'datetime',
             'scheduled_at' => 'datetime',
+            'audio_generated_at' => 'datetime',
             'view_count' => 'integer',
+            'gallery_images' => 'array',
         ];
     }
 
@@ -62,6 +64,11 @@ class Post extends Model
     public function reactions(): HasMany
     {
         return $this->hasMany(PostReaction::class);
+    }
+
+    public function postViews(): HasMany
+    {
+        return $this->hasMany(PostView::class);
     }
 
     public function scopePublished(Builder $query): Builder
@@ -97,6 +104,16 @@ class Post extends Model
     public function coverImageUrl(): ?string
     {
         return $this->cover_image ? Storage::disk('public')->url($this->cover_image) : null;
+    }
+
+    /**
+     * Absolute URLs for the post's gallery images.
+     */
+    public function galleryImageUrls(): array
+    {
+        return collect($this->gallery_images ?? [])
+            ->map(fn($path) => Storage::disk('public')->url($path))
+            ->toArray();
     }
 
     /**

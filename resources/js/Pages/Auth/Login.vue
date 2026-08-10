@@ -33,9 +33,9 @@ const submit = () => {
     <GuestLayout>
         <Head title="Log in" />
 
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Welcome back</h1>
-            <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <div class="mb-8 text-center">
+            <h1 class="font-display text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">Welcome back</h1>
+            <p class="mt-2 text-sm font-medium text-zinc-500 dark:text-zinc-400">
                 Sign in to continue writing with AI.
             </p>
         </div>
@@ -67,7 +67,7 @@ const submit = () => {
                     <Link
                         v-if="canResetPassword"
                         :href="route('password.request')"
-                        class="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+                        class="text-sm font-semibold text-primary-700 transition-colors hover:text-primary-600 dark:text-primary-400"
                     >
                         Forgot password?
                     </Link>
@@ -100,7 +100,7 @@ const submit = () => {
 
             <p class="text-center text-sm text-zinc-500 dark:text-zinc-400">
                 Don&rsquo;t have an account?
-                <Link :href="route('register')" class="font-semibold text-indigo-600 hover:text-indigo-500">
+                <Link :href="route('register')" class="font-semibold text-primary-700 transition-colors hover:text-primary-600 dark:text-primary-400">
                     Create one
                 </Link>
             </p>

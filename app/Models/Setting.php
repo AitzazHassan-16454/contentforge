@@ -1,0 +1,30 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Model;
+
+#[Fillable(['key', 'value'])]
+class Setting extends Model
+{
+    protected $primaryKey = 'key';
+
+    public $incrementing = false;
+
+    /**
+     * Fetch a setting value, falling back to the given default.
+     */
+    public static function get(string $key, ?string $default = null): ?string
+    {
+        return static::query()->find($key)?->value ?? $default;
+    }
+
+    /**
+     * Set (upsert) a single setting value.
+     */
+    public static function set(string $key, ?string $value): void
+    {
+        static::query()->updateOrCreate(['key' => $key], ['value' => $value]);
+    }
+}

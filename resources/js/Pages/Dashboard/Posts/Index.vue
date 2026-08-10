@@ -66,7 +66,7 @@ function destroy(post) {
             </Transition>
 
             <div v-if="posts.data.length === 0" class="card p-14 text-center">
-                <div class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-100 to-violet-100 text-indigo-600 dark:from-indigo-500/20 dark:to-violet-500/20 dark:text-indigo-300">
+                <div class="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-100 to-primary-100 text-primary-700 dark:from-primary-600/20 dark:to-primary-600/20 dark:text-primary-300">
                     <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                     </svg>
@@ -86,30 +86,30 @@ function destroy(post) {
                 </Link>
             </div>
 
-            <div v-else class="card overflow-hidden">
-                <ul class="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <div v-else class="space-y-4">
+                <ul class="flex flex-col gap-4">
                     <li
                         v-for="post in posts.data"
                         :key="post.id"
-                        class="flex flex-col gap-4 p-5 transition hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 sm:flex-row sm:items-center sm:justify-between"
+                        class="card flex flex-col gap-4 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:flex-row sm:items-center sm:justify-between"
                     >
                         <div class="min-w-0">
-                            <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-3">
                                 <span
                                     :class="[
                                         post.status === 'published'
-                                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30'
-                                            : 'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/30',
+                                            ? 'bg-emerald-500/10 text-emerald-700 ring-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:ring-emerald-500/40'
+                                            : 'bg-amber-500/10 text-amber-700 ring-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:ring-amber-500/40',
                                     ]"
                                     class="chip ring-1 ring-inset"
                                 >
                                     <span
-                                        class="h-1.5 w-1.5 rounded-full"
+                                        class="h-2 w-2 rounded-full shadow-[0_0_8px_currentColor]"
                                         :class="post.status === 'published' ? 'bg-emerald-500' : 'bg-amber-500'"
                                     ></span>
-                                    {{ post.status }}
+                                    <span class="uppercase tracking-wider text-[10px]">{{ post.status }}</span>
                                 </span>
-                                <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                                <span class="text-xs font-bold text-zinc-500 dark:text-zinc-400">
                                     <template v-if="post.status === 'published'">
                                         Published {{ post.published_at }}
                                     </template>
@@ -120,22 +120,22 @@ function destroy(post) {
                             </div>
                             <Link
                                 :href="route('dashboard.posts.edit', post.id)"
-                                class="mt-2 block truncate text-lg font-bold text-zinc-900 transition hover:text-indigo-600 dark:text-zinc-100 dark:hover:text-indigo-400"
+                                class="mt-3 block truncate text-2xl font-black text-zinc-900 transition hover:text-primary-700 dark:text-white dark:hover:text-primary-500"
                             >
                                 {{ post.title }}
                             </Link>
-                            <div v-if="post.categories.length || post.tags.length" class="mt-2 flex flex-wrap gap-1.5">
+                            <div v-if="post.categories.length || post.tags.length" class="mt-4 flex flex-wrap gap-2">
                                 <span
                                     v-for="category in post.categories"
                                     :key="category.id"
-                                    class="chip bg-indigo-50 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300"
+                                    class="rounded-md border border-primary-100 bg-primary-50 px-3 py-1.5 text-xs font-bold text-primary-800 dark:border-primary-600/20 dark:bg-primary-600/10 dark:text-primary-300"
                                 >
                                     {{ category.name }}
                                 </span>
                                 <span
                                     v-for="tag in post.tags"
                                     :key="tag.id"
-                                    class="chip bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                                    class="rounded-md border border-zinc-200 bg-zinc-100 px-3 py-1.5 text-xs font-bold text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
                                 >
                                     #{{ tag.name }}
                                 </span>
@@ -157,14 +157,14 @@ function destroy(post) {
                             </button>
                             <Link
                                 :href="route('dashboard.posts.edit', post.id)"
-                                class="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                                class="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                             >
                                 Edit
                             </Link>
                             <Link
                                 v-if="post.status === 'published'"
                                 :href="route('posts.show', post.slug)"
-                                class="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                                class="rounded-xl bg-zinc-100 px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                             >
                                 View
                             </Link>
@@ -188,8 +188,8 @@ function destroy(post) {
                     :class="[
                         'inline-flex items-center rounded-xl border px-3 py-2 text-sm font-semibold transition',
                         link.active
-                            ? 'border-indigo-600 bg-indigo-600 text-white shadow-sm'
-                            : 'border-zinc-200 bg-white text-zinc-600 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-800',
+                            ? 'border-primary-500 bg-primary-500 text-white shadow-sm'
+                            : 'border-zinc-200 bg-white text-zinc-600 shadow-sm hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:bg-zinc-900',
                         !link.url && 'pointer-events-none opacity-50',
                     ]"
                     v-html="link.label"
